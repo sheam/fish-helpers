@@ -18,8 +18,50 @@ function fish_prompt
     set_color normal
 end
 
+function _prompt_find_up
+    set -l file $argv[1]
+    set -l dir (pwd)
+    set -l depth 0
+    while true
+        if test -f "$dir/$file"
+            return 0
+        end
+        if test -d "$dir/.git" -o $depth -ge 3 -o "$dir" = "/" -o "$dir" = $HOME
+            return 1
+        end
+        set dir (dirname $dir)
+        set depth (math $depth + 1)
+    end
+end
+
 function fish_right_prompt
     set -l parts
+
+    # Language detection (walks up to home dir)
+    if _prompt_find_up go.mod; and command -q go
+        set -l m (go version 2>/dev/null | string match -r 'go(\d+\.\d+[\d.]*)')
+        set -a parts (set_color cyan)'🐹 go '(set_color normal)(set_color --bold white)$m[2](set_color normal)
+    end
+    if _prompt_find_up Cargo.toml; and command -q rustc
+        set -l m (rustc --version 2>/dev/null | string split ' ')
+        set -a parts (set_color brred)'🦀 '(set_color normal)(set_color --bold white)$m[2](set_color normal)
+    end
+    if _prompt_find_up package.json; and command -q node
+        set -l ver (node --version 2>/dev/null)
+        if _prompt_find_up tsconfig.json
+            set -a parts (set_color blue)'󰛦 '(set_color normal)(set_color --bold white)$ver(set_color normal)
+        else
+            set -a parts (set_color green)'⬡ '(set_color normal)(set_color --bold white)$ver(set_color normal)
+        end
+    end
+    if begin
+            _prompt_find_up pyproject.toml
+            or _prompt_find_up requirements.txt
+            or _prompt_find_up setup.py
+        end; and command -q python3
+        set -l m (python3 --version 2>/dev/null | string split ' ')
+        set -a parts (set_color yellow)'🐍 '(set_color normal)(set_color --bold white)$m[2](set_color normal)
+    end
 
     # Git branch + dirty indicator
     if command -q git; and git rev-parse --is-inside-work-tree >/dev/null 2>&1
@@ -45,6 +87,11 @@ function fish_right_prompt
         end
     else if test -f /.dockerenv
         set -a parts (set_color cyan)'⬡ docker'(set_color normal)
+    end
+
+    # rpm-ostree staged deployment (fast file check — no subprocess)
+    if test -f /run/ostree/staged-deployment
+        set -a parts (set_color bryellow)'󰚰 reboot to update'(set_color normal)
     end
 
     # user@host on SSH only

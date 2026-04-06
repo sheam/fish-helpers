@@ -29,3 +29,5 @@ end
 for helper in $helpers
     _fish_load_script $helper
 end
+
+source "$HOME/.vite-plus/env.fish"

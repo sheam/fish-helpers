@@ -31,6 +31,91 @@ end
 # Tab completion for rebase command
 complete -c rebase -f -xa '(git branch -a 2>/dev/null | string replace -r "^[* ] " "" | string replace -r "remotes/origin/" "" | sort -u)'
 
+function git_prune --description 'Delete local branches whose remote has been deleted (e.g. after PR merge)'
+    set -l dry_run false
+    if test "$argv[1]" = --dry-run; or test "$argv[1]" = -n
+        set dry_run true
+    end
+
+    echo "Fetching and pruning remote tracking branches..."
+    if not git fetch --prune
+        echo "Error: git fetch --prune failed"
+        return 1
+    end
+
+    set -l current_branch (git symbolic-ref --short HEAD 2>/dev/null)
+
+    set -l gone_branches
+    for line in (git branch -vv | string match -r '.*: gone\].*')
+        set -l branch (echo $line | string replace -r '^[* +] ' '' | string split ' ')[1]
+        set -a gone_branches $branch
+    end
+
+    if test (count $gone_branches) -eq 0
+        echo "No branches to prune."
+        return 0
+    end
+
+    set -l deleted
+    set -l skipped
+    set -l failed
+
+    if test $dry_run = true
+        echo "[DRY RUN] No branches will be deleted."
+    end
+    echo ""
+
+    for branch in $gone_branches
+        if test "$branch" = "$current_branch"
+            echo "Skipping '$branch' (currently checked out)"
+            set -a skipped $branch
+            continue
+        end
+
+        if test $dry_run = true
+            echo "Would delete: $branch"
+            set -a deleted $branch
+        else
+            if git branch -D $branch
+                set -a deleted $branch
+            else
+                set -a failed $branch
+            end
+        end
+    end
+
+    echo ""
+    echo "==============================="
+    if test $dry_run = true
+        echo "  DRY RUN REPORT"
+    else
+        echo "  SUMMARY REPORT"
+    end
+    echo "==============================="
+
+    if test (count $deleted) -gt 0
+        echo ""
+        echo "Deleted ("(count $deleted)"):"
+        for b in $deleted; echo "  - $b"; end
+    end
+
+    if test (count $skipped) -gt 0
+        echo ""
+        echo "Skipped ("(count $skipped)"):"
+        for b in $skipped; echo "  - $b"; end
+    end
+
+    if test (count $failed) -gt 0
+        echo ""
+        echo "Failed ("(count $failed)"):"
+        for b in $failed; echo "  - $b"; end
+        return 1
+    end
+
+    echo ""
+    return 0
+end
+
 function git_rebase_all_master --description 'Rebase submodules onto master based on parent branch'
     set -l dry_run false
     if test "$argv[1]" = --dry-run; or test "$argv[1]" = -n

@@ -4,7 +4,9 @@ function fish_prompt
     # Directory on its own line
     echo ''
     set_color --bold yellow
-    echo (prompt_pwd)
+    # Treat /var$HOME the same as $HOME (btrfs /var home mounts on Linux)
+    set -l cwd (string replace "/var$HOME" $HOME $PWD)
+    echo (prompt_pwd $cwd)
     set_color normal
 
     # Prompt character

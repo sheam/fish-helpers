@@ -5,3 +5,4 @@ fish_add_path ~/.opencode/bin
 fish_add_path /home/linuxbrew/.linuxbrew/bin
 fish_add_path /home/linuxbrew/.linuxbrew/sbin
 fish_add_path /home/linuxbrew/.linuxbrew/opt/libpq/bin
+fish_add_path ~/.fly/bin

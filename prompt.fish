@@ -70,7 +70,7 @@ function fish_right_prompt
         set -l branch (git symbolic-ref --short HEAD 2>/dev/null; or git describe --tags --exact-match 2>/dev/null; or git rev-parse --short HEAD 2>/dev/null)
         if test -n "$branch"
             set -l git_info (set_color purple)$branch(set_color normal)
-            if not git diff-index --quiet HEAD -- 2>/dev/null; or test -n "$(git ls-files --others --exclude-standard 2>/dev/null | head -1)"
+            if not git diff-index --quiet --ignore-submodules HEAD -- 2>/dev/null; or test -n "$(git ls-files --others --exclude-standard 2>/dev/null | head -1)"
                 set git_info $git_info(set_color red)' *'(set_color normal)
             end
             set -a parts $git_info

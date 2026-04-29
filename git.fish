@@ -36,3 +36,187 @@ function gitprune
         git branch -D $branch
     end
 end
+
+function rebase
+    set -l branch $argv[1]
+    echo "Fetching latest changes from origin/$branch..."
+    if not git fetch origin $branch
+        echo "Error: Failed to fetch origin/$branch"
+        return 1
+    end
+
+    echo "Rebasing current branch onto origin/$branch..."
+    if not git rebase origin/$branch
+        echo "Error: Rebase failed. You may need to resolve conflicts."
+        echo "Use 'git rebase --continue' after resolving conflicts, or 'git rebase --abort' to cancel."
+        return 1
+    end
+
+    echo "Successfully rebased onto origin/$branch"
+    return 0
+end
+
+# Tab completion for rebase command
+complete -c rebase -f -xa '(git branch -a 2>/dev/null | string replace -r "^[* ] " "" | string replace -r "remotes/origin/" "" | sort -u)'
+
+function git_prune --description 'Delete local branches whose remote has been deleted (e.g. after PR merge)'
+    set -l dry_run false
+    if test "$argv[1]" = --dry-run; or test "$argv[1]" = -n
+        set dry_run true
+    end
+
+    echo "Fetching and pruning remote tracking branches..."
+    if not git fetch --prune
+        echo "Error: git fetch --prune failed"
+        return 1
+    end
+
+    set -l current_branch (git symbolic-ref --short HEAD 2>/dev/null)
+
+    set -l gone_branches
+    for line in (git branch -vv | string match -r '.*: gone\].*')
+        set -l branch (echo $line | string replace -r '^[* +] ' '' | string split ' ')[1]
+        set -a gone_branches $branch
+    end
+
+    if test (count $gone_branches) -eq 0
+        echo "No branches to prune."
+        return 0
+    end
+
+    set -l deleted
+    set -l skipped
+    set -l failed
+
+    if test $dry_run = true
+        echo "[DRY RUN] No branches will be deleted."
+    end
+    echo ""
+
+    for branch in $gone_branches
+        if test "$branch" = "$current_branch"
+            echo "Skipping '$branch' (currently checked out)"
+            set -a skipped $branch
+            continue
+        end
+
+        if test $dry_run = true
+            echo "Would delete: $branch"
+            set -a deleted $branch
+        else
+            if git branch -D $branch
+                set -a deleted $branch
+            else
+                set -a failed $branch
+            end
+        end
+    end
+
+    echo ""
+    echo "==============================="
+    if test $dry_run = true
+        echo "  DRY RUN REPORT"
+    else
+        echo "  SUMMARY REPORT"
+    end
+    echo "==============================="
+
+    if test (count $deleted) -gt 0
+        echo ""
+        echo "Deleted ("(count $deleted)"):"
+        for b in $deleted; echo "  - $b"; end
+    end
+
+    if test (count $skipped) -gt 0
+        echo ""
+        echo "Skipped ("(count $skipped)"):"
+        for b in $skipped; echo "  - $b"; end
+    end
+
+    if test (count $failed) -gt 0
+        echo ""
+        echo "Failed ("(count $failed)"):"
+        for b in $failed; echo "  - $b"; end
+        return 1
+    end
+
+    echo ""
+    return 0
+end
+
+function git_rebase_all_master --description 'Rebase submodules onto master based on parent branch'
+    set -l dry_run false
+    if test "$argv[1]" = --dry-run; or test "$argv[1]" = -n
+        set dry_run true
+    end
+
+    set -l parent_branch (git symbolic-ref --short HEAD 2>/dev/null)
+    if test -z "$parent_branch"
+        echo "Error: Parent repo is on a detached HEAD. Please checkout a branch first."
+        return 1
+    end
+
+    set -l rebased
+    set -l detached
+    set -l pulled
+    set -l skipped
+    set -l failed
+
+    if test $dry_run = true
+        echo "[DRY RUN] No changes will be made."
+        echo ""
+    end
+
+    echo "Parent repo branch: $parent_branch"
+    echo ""
+
+    for sm_path in (git submodule foreach --quiet 'echo $sm_path')
+        echo "=== Submodule: $sm_path ==="
+
+        set -l sub_branch (git -C $sm_path symbolic-ref --short HEAD 2>/dev/null)
+
+        if test -z "$sub_branch"
+            # Detached HEAD — checkout latest master
+            if test $dry_run = true
+                echo "  Detached HEAD detected. Would checkout latest master."
+            else
+                echo "  Detached HEAD detected. Checking out latest master..."
+                git -C $sm_path fetch origin master
+                git -C $sm_path checkout master
+                git -C $sm_path pull origin master
+            end
+            set -a detached $sm_path
+        else if test "$sub_branch" = master
+            # On master — pull latest
+            if test $dry_run = true
+                echo "  On master. Would pull latest."
+            else
+                echo "  On master. Pulling latest..."
+                git -C $sm_path pull origin master
+            end
+            set -a pulled $sm_path
+        else if test "$sub_branch" = "$parent_branch"
+            # Branch matches parent — rebase onto latest master
+            if test $dry_run = true
+                echo "  On branch '$sub_branch' (matches parent). Would rebase onto origin/master."
+            else
+                echo "  On branch '$sub_branch' (matches parent). Rebasing onto origin/master..."
+                git -C $sm_path fetch origin master
+                if not git -C $sm_path rebase origin/master
+                    echo "  Error: Rebase failed in $sm_path. Aborting rebase."
+                    git -C $sm_path rebase --abort
+                    echo "  Resolve conflicts manually and retry."
+                    set -a failed $sm_path
+                    echo ""
+                    continue
+                else
+                    echo "  Successfully rebased '$sub_branch' onto origin/master."
+                end
+            end
+            set -a rebased $sm_path
+        else
+            echo "  On branch '$sub_branch' (does not match parent '$parent_branch'). Skipping."
+            set -a skipped $sm_path
+        end
+    end
+end

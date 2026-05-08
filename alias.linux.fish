@@ -21,3 +21,4 @@ end
 
 abbr -a less 'glow -p'
 abbr -a g glow
+abbr -a tb toolbox enter fedora-toolbox-44

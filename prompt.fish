@@ -6,7 +6,11 @@ function fish_prompt
     set_color --bold yellow
     # Treat /var$HOME the same as $HOME (btrfs /var home mounts on Linux)
     set -l cwd (string replace "/var$HOME" $HOME $PWD)
-    echo (prompt_pwd $cwd)
+    if set -l _fv (fish --version 2>&1 | string match -r '\d+\.\d+'); and string match -qr '^3\.[0-3]' $_fv
+        echo (prompt_pwd)
+    else
+        echo (prompt_pwd $cwd)
+    end
     set_color normal
 
     # Prompt character
@@ -70,7 +74,8 @@ function fish_right_prompt
         set -l branch (git symbolic-ref --short HEAD 2>/dev/null; or git describe --tags --exact-match 2>/dev/null; or git rev-parse --short HEAD 2>/dev/null)
         if test -n "$branch"
             set -l git_info (set_color purple)$branch(set_color normal)
-            if not git diff-index --quiet --ignore-submodules HEAD -- 2>/dev/null; or test -n "$(git ls-files --others --exclude-standard 2>/dev/null | head -1)"
+            set -l _untracked (git ls-files --others --exclude-standard 2>/dev/null | head -1)
+            if not git diff-index --quiet --ignore-submodules HEAD -- 2>/dev/null; or test -n "$_untracked"
                 set git_info $git_info(set_color red)' *'(set_color normal)
             end
             set -a parts $git_info

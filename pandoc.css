@@ -1,0 +1,287 @@
+/*
+ * I add this to html files generated with pandoc.
+ */
+
+/* ── Page & base ─────────────────────────────────────────────────── */
+
+html {
+  font-size: 100%;
+  overflow-y: scroll;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+body {
+  color: #333;
+  font-family: Georgia, Palatino, 'Palatino Linotype', Times, 'Times New Roman', serif;
+  font-size: 14px;
+  line-height: 1.75;
+  padding: 2em 3em;
+  margin: auto;
+  max-width: 48em;
+  background: #fff;
+}
+
+/* ── Links ───────────────────────────────────────────────────────── */
+
+a { color: #2a6496; text-decoration: none; }
+a:visited { color: #1a4070; }
+a:hover { text-decoration: underline; }
+a:active { color: #faa700; }
+a:focus { outline: thin dotted; }
+
+*::selection    { background: rgba(255, 255, 0, 0.3); color: #000; }
+a::selection    { background: rgba(255, 255, 0, 0.3); color: #2a6496; }
+
+/* ── Headings ────────────────────────────────────────────────────── */
+
+h1, h2, h3, h4, h5, h6 {
+  color: #111;
+  line-height: 1.25;
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  font-weight: normal;
+}
+
+h4, h5, h6 { font-weight: bold; }
+
+h1 {
+  font-size: 2.4em;
+  border-bottom: 2px solid #333;
+  padding-bottom: 0.25em;
+  margin-top: 1em;
+}
+
+h2 {
+  font-size: 1.8em;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 0.2em;
+}
+
+h3 { font-size: 1.35em; }
+h4 { font-size: 1.1em; }
+h5 { font-size: 1em; }
+h6 { font-size: 0.9em; color: #555; }
+
+/* ── Body elements ───────────────────────────────────────────────── */
+
+p { margin: 0.9em 0; }
+
+img {
+  max-width: 100%;
+  border: 0;
+  vertical-align: middle;
+  -ms-interpolation-mode: bicubic;
+}
+
+figure {
+  display: block;
+  text-align: center;
+  margin: 1.5em 0;
+}
+
+figure img  { margin: 0 auto; }
+figcaption  { font-size: 0.82em; font-style: italic; margin-top: 0.4em; color: #555; }
+
+hr {
+  display: block;
+  height: 0;
+  border: 0;
+  border-top: 1px solid #bbb;
+  margin: 2em 0;
+  padding: 0;
+}
+
+b, strong { font-weight: bold; }
+dfn       { font-style: italic; }
+ins       { background: #ff9; color: #000; text-decoration: none; }
+
+mark {
+  background: #ff0;
+  color: #000;
+  font-style: italic;
+  font-weight: bold;
+}
+
+sub, sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+sup { top: -0.5em; }
+sub { bottom: -0.25em; }
+
+/* ── Lists ───────────────────────────────────────────────────────── */
+
+ul, ol {
+  margin: 0.8em 0;
+  padding: 0 0 0 2em;
+}
+
+li p:last-child  { margin-bottom: 0; }
+ul ul, ol ol     { margin: 0.3em 0; }
+
+dl            { margin-bottom: 1em; }
+dt            { font-weight: bold; margin-bottom: 0.4em; }
+dd            { margin: 0 0 0.8em 2em; }
+dd:last-child { margin-bottom: 0; }
+
+/* ── Blockquote ──────────────────────────────────────────────────── */
+
+blockquote {
+  color: #555;
+  margin: 1.5em 0;
+  padding: 0.6em 1.2em;
+  border-left: 4px solid #bbb;
+  background: #f9f9f9;
+  font-style: italic;
+}
+
+blockquote p:first-child { margin-top: 0; }
+blockquote p:last-child  { margin-bottom: 0; }
+
+/* ── Code ────────────────────────────────────────────────────────── */
+
+code, kbd, samp {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.88em;
+  background: #f3f3f3;
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  border: 1px solid #e0e0e0;
+}
+
+pre {
+  background: #f6f6f6;
+  border: 1px solid #ddd;
+  border-left: 4px solid #888;
+  border-radius: 3px;
+  padding: 1em 1.2em;
+  overflow-x: auto;
+  white-space: pre;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  line-height: 1.5;
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.92em;
+}
+
+/* ── Tables ──────────────────────────────────────────────────────── */
+
+table {
+  width: 100%;
+  margin: 1.5em 0 2em;
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-size: 0.95em;
+}
+
+table th {
+  padding: 0.5em 1em;
+  background: #eee;
+  border: 1px solid #ccc;
+  font-weight: bold;
+  text-align: left;
+}
+
+table td {
+  padding: 0.45em 1em;
+  border: 1px solid #ddd;
+  vertical-align: top;
+}
+
+table tr:nth-child(even) td {
+  background: #fafafa;
+}
+
+/* ── Author / title metadata ─────────────────────────────────────── */
+
+.author { font-size: 1.2em; text-align: center; }
+.date   { text-align: center; color: #666; margin-top: -1em; }
+.title  { text-align: center; }
+
+/* ── Responsive screen ───────────────────────────────────────────── */
+
+@media only screen and (min-width: 480px) {
+  body { font-size: 15px; }
+}
+
+@media only screen and (min-width: 768px) {
+  body { font-size: 16px; }
+}
+
+/* ── Print — letter paper ────────────────────────────────────────── */
+
+@media print {
+  @page {
+    size: letter;
+    margin: 1in 1.25in;
+  }
+
+  @page :left  { margin: 1in 1.25in 1in 1in; }
+  @page :right { margin: 1in 1in 1in 1.25in; }
+
+  body {
+    font-size: 11pt;
+    line-height: 1.6;
+    max-width: 100%;
+    padding: 0;
+    color: #000;
+    background: #fff;
+  }
+
+  h1, h2, h3, h4, h5, h6 { color: #000; page-break-after: avoid; }
+  h1 { border-bottom-color: #000; }
+  h2 { border-bottom-color: #888; }
+
+  p, h2, h3 { orphans: 3; widows: 3; }
+
+  a, a:visited { color: #000; text-decoration: underline; }
+  a[href]:after { content: " (" attr(href) ")"; font-size: 0.85em; color: #444; }
+  a[href^="javascript:"]:after,
+  a[href^="#"]:after { content: ""; }
+  abbr[title]:after { content: " (" attr(title) ")"; }
+
+  pre, blockquote {
+    border: 1px solid #999;
+    page-break-inside: avoid;
+  }
+
+  pre {
+    background: #f6f6f6 !important;
+    border-left: 3pt solid #888;
+    padding: 0.6em 0.8em;
+    font-size: 9pt;
+  }
+
+  code, kbd, samp {
+    background: #f0f0f0 !important;
+    border: 1px solid #ccc;
+    font-size: 9pt;
+  }
+
+  pre code { background: none !important; border: none; }
+
+  blockquote {
+    background: #f9f9f9 !important;
+    border-left: 3pt solid #999;
+    color: #333;
+  }
+
+  table {
+    border-collapse: collapse;
+    font-size: 10pt;
+  }
+
+  table th { background: #eee !important; }
+  table tr:nth-child(even) td { background: #f7f7f7 !important; }
+
+  tr, img { page-break-inside: avoid; }
+  img { max-width: 100% !important; }
+}

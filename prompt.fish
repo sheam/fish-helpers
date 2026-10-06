@@ -74,7 +74,8 @@ function fish_right_prompt
         set -l branch (git symbolic-ref --short HEAD 2>/dev/null; or git describe --tags --exact-match 2>/dev/null; or git rev-parse --short HEAD 2>/dev/null)
         if test -n "$branch"
             set -l git_info (set_color purple)$branch(set_color normal)
-            if test -n (git status --porcelain --ignore-submodules -uno 2>/dev/null | head -1)
+            set -l dirty (git status --porcelain --ignore-submodules -uno 2>/dev/null)
+            if test -n "$dirty"
                 set git_info $git_info(set_color red)' *'(set_color normal)
             end
             set -a parts $git_info

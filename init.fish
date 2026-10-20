@@ -30,4 +30,3 @@ for helper in $helpers
     _fish_load_script $helper
 end
 
-source "$HOME/.config/vite-plus/env.fish"

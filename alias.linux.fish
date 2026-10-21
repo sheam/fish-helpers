@@ -7,6 +7,9 @@ function yzd --description 'yazi file browser with directory changing'
     rm -f "$tmp"
 end
 
+# Resolved at source time: inside a function, `status filename` isn't reliable.
+set -g __md2_css (path resolve (path dirname (status filename)))/pandoc.css
+
 function md2 --description 'Convert a Markdown file to HTML (and optionally PDF) using pandoc.'
     argparse 'h/help' 'p/pdf' -- $argv
     or return 1
@@ -33,13 +36,23 @@ function md2 --description 'Convert a Markdown file to HTML (and optionally PDF)
     end
     set -l out $outdir/$name.html
 
-    pandoc $file -s -o $out --css $HOME/code/fish/pandoc.css --metadata title="$name"
+    if not test -f $__md2_css
+        echo "md2: stylesheet not found: $__md2_css" >&2
+        return 1
+    end
+
+    pandoc $file -s -o $out --css $__md2_css --metadata title="$name"
+    or return 1
     echo "Generated $out"
 
     if set -q _flag_pdf
         set -l pdf_out $outdir/$name.pdf
-        pandoc $file -s -o $pdf_out --pdf-engine=weasyprint --css $HOME/code/fish/pandoc.css --metadata title="$name" 2>/dev/null
-        echo "Generated $pdf_out"
+        if pandoc $file -s -o $pdf_out --pdf-engine=weasyprint --css $__md2_css --metadata title="$name"
+            echo "Generated $pdf_out"
+        else
+            echo "md2: PDF generation failed" >&2
+            return 1
+        end
     end
 end
 

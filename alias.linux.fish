@@ -25,13 +25,19 @@ function md2 --description 'Convert a Markdown file to HTML (and optionally PDF)
 
     set -l file $argv[1]
     set -l name (string replace -r '\.[^.]+$' '' (basename $file))
-    set -l out ~/Documents/$name.html
+    set -l outdir (dirname $file)
+    if test -d ~/Documents
+        set outdir ~/Documents
+    else if test -d ~/docs
+        set outdir ~/docs
+    end
+    set -l out $outdir/$name.html
 
     pandoc $file -s -o $out --css $HOME/code/fish/pandoc.css --metadata title="$name"
     echo "Generated $out"
 
     if set -q _flag_pdf
-        set -l pdf_out ~/Documents/$name.pdf
+        set -l pdf_out $outdir/$name.pdf
         pandoc $file -s -o $pdf_out --pdf-engine=weasyprint --css $HOME/code/fish/pandoc.css --metadata title="$name" 2>/dev/null
         echo "Generated $pdf_out"
     end

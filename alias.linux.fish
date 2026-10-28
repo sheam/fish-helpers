@@ -41,7 +41,7 @@ function md2 --description 'Convert a Markdown file to HTML (and optionally PDF)
         return 1
     end
 
-    pandoc $file -s -o $out --css $__md2_css --metadata title="$name"
+    pandoc $file -s --embed-resources -o $out --css $__md2_css --metadata title="$name"
     or return 1
     echo "Generated $out"
 
